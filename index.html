@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <link rel="icon" type="image/png" href="10.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lionel Messi - LM10 The GOAT Interactive Presentation</title>
+    <!-- Font Awesome 6 Pro / Free CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Three.js for 3D Visualizer -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        albiceleste: '#75AADB',
+                        gold: '#FFD700',
+                        neonBlue: '#00f0ff',
+                        darkNavy: '#030712',
+                        cardNavy: 'rgba(10, 20, 42, 0.75)'
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Modern Glassmorphism & Custom Animations */
+        :root {
+            --electric-blue: #00f0ff;
+            --albiceleste: #75aadb;
+            --gold: #ffd700;
+            --dark-bg: #030712;
+            --card-border: rgba(0, 240, 255, 0.25);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #f0f6fc;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 240, 255, 0.6);
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(10, 20, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 240, 255, 0.05);
+        }
+
+        .glass-gold {
+            background: rgba(255, 215, 0, 0.08);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.15);
+        }
+
+        .glow-text-blue {
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.6), 0 0 40px rgba(0, 240, 255, 0.2);
+        }
+
+        .glow-text-gold {
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.7), 0 0 40px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Canvas Elements */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* 3D Canvas Box */
+        #trophy3DCanvas {
+            width: 100%;
+            height: 360px;
+            border-radius: 1rem;
+            cursor: grab;
+        }
+        #trophy3DCanvas:active {
+            cursor: grabbing;
+        }
+
+        /* Animations */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(1deg); }
+        }
+
+        .animate-float {
+            animation: floatSlow 6s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; filter: blur(20px); }
+            50% { opacity: 0.9; filter: blur(35px); }
+        }
+
+        .glow-orb {
+            animation: pulseGlow 5s ease-in-out infinite;
+        }
+
+        /* Pitch Radar & Heatmap */
+        .tactical-pitch {
+            background: radial-gradient(circle, rgba(16, 42, 28, 0.95) 0%, rgba(5, 20, 12, 0.98) 100%);
+            border: 2px solid rgba(34, 197, 94, 0.4);
+            position: relative;
+        }
+
+        .heatmap-node {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(14px);
+            opacity: 0.75;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Scroll Reveal Animation */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .reveal-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="text-slate-100 antialiased selection:bg-neonBlue selection:text-black">
+
+    <!-- Interactive Particle Background Canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Top Navigation Bar -->
+    <nav class="fixed top-0 left-0 w-full z-50 glass-panel border-b border-cyan-500/20 px-4 md:px-8 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 via-blue-600 to-yellow-400 p-[2px] shadow-lg shadow-cyan-500/30">
+                <div class="w-full h-full bg-darkNavy rounded-full flex items-center justify-center font-display font-black text-neonBlue text-lg">
+                    10
+                </div>
+            </div>
+            <div>
+                <span class="font-display font-black text-xl tracking-wider text-white">MESSI <span class="text-gold">LM10</span></span>
+                <span class="hidden md:inline-block text-xs bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-full border border-cyan-500/40 ml-2 font-mono">THE GOAT EXPERIENCE</span>
+            </div>
+        </div>
+
+        <!-- Desktop Nav Links -->
+        <div class="hidden lg:flex items-center gap-6 font-semibold text-sm">
+            <a href="#hero" onclick="playSfx('click')" class="hover:text-neonBlue transition-colors flex items-center gap-1.5"><i class="fa-solid fa-house text-cyan-400 text-xs"></i> Intro</a>
+            <a href="#stats" onclick="playSfx('click')" class="hover:text-neonBlue transition-colors flex items-center gap-1.5"><i class="fa-solid fa-chart-line text-cyan-400 text-xs"></i> Stats & Goals</a>
+            <a href="#trophies" onclick="playSfx('click')" class="hover:text-neonBlue transition-colors flex items-center gap-1.5"><i class="fa-solid fa-trophy text-gold text-xs"></i> 3D Trophies</a>
+            <a href="#tactics" onclick="playSfx('click')" class="hover:text-neonBlue transition-colors flex items-center gap-1.5"><i class="fa-solid fa-futbol text-green-400 text-xs"></i> Pitch Heatmap</a>
+            <a href="#timeline" onclick="playSfx('click')" class="hover:text-neonBlue transition-colors flex items-center gap-1.5"><i class="fa-solid fa-timeline text-cyan-400 text-xs"></i> Eras</a>
+            <a href="#quiz" onclick="playSfx('click')" class="hover:text-neonBlue transition-colors flex items-center gap-1.5"><i class="fa-solid fa-gamepad text-purple-400 text-xs"></i> Trivia Quiz</a>
+            <a href="#tributes" onclick="playSfx('click')" class="hover:text-neonBlue transition-colors flex items-center gap-1.5"><i class="fa-solid fa-comments text-pink-400 text-xs"></i> Fan Wall</a>
+        </div>
+
+        <!-- Controls (Audio Sound FX & Mobile Menu Toggle) -->
+        <div class="flex items-center gap-3">
+            <button id="soundToggleBtn" onclick="toggleAudio()" class="px-3 py-1.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold hover:bg-cyan-500/30 transition-all flex items-center gap-2">
+                <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+                <span id="soundText" class="hidden sm:inline">SFX ON</span>
+            </button>
+            <button onclick="toggleMobileMenu()" class="lg:hidden p-2 text-slate-300 hover:text-white text-xl">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobileMenu" class="fixed inset-0 bg-darkNavy/95 backdrop-blur-2xl z-40 flex flex-col justify-center items-center gap-6 text-xl font-bold transition-all duration-300 opacity-0 pointer-events-none lg:hidden">
+        <a href="#hero" onclick="toggleMobileMenu()" class="hover:text-neonBlue">Intro</a>
+        <a href="#stats" onclick="toggleMobileMenu()" class="hover:text-neonBlue">Stats & Goal Explorer</a>
+        <a href="#trophies" onclick="toggleMobileMenu()" class="hover:text-gold">3D Trophies</a>
+        <a href="#tactics" onclick="toggleMobileMenu()" class="hover:text-green-400">Heatmap Visualizer</a>
+        <a href="#timeline" onclick="toggleMobileMenu()" class="hover:text-neonBlue">Career Timeline</a>
+        <a href="#quiz" onclick="toggleMobileMenu()" class="hover:text-purple-400">Master Quiz</a>
+        <a href="#tributes" onclick="toggleMobileMenu()" class="hover:text-pink-400">Fan Tribute Wall</a>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="pt-24 space-y-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- ================= HERO SECTION ================= -->
+        <section id="hero" class="min-h-[85vh] flex flex-col lg:flex-row items-center justify-between gap-12 pt-8 reveal-on-scroll">
+            <div class="flex-1 space-y-6 text-center lg:text-left">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-gold text-yellow-300 text-xs font-bold tracking-widest uppercase animate-bounce">
+                    <i class="fa-solid fa-crown text-gold"></i> The Greatest Of All Time
+                </div>
+                
+                <h1 class="text-5xl sm:text-7xl font-black font-display tracking-tight leading-none">
+                    LIONEL <br/>
+                    <span class="bg-gradient-to-r from-neonBlue via-albiceleste to-gold bg-clip-text text-transparent glow-text-blue">
+                        MESSI
+                    </span>
+                    <span class="text-gold glow-text-gold">LM10</span>
+                </h1>
+                
+                <p class="text-slate-300 text-lg max-w-2xl font-light leading-relaxed mx-auto lg:mx-0">
+                    Step inside the ultimate interactive tribute to Lionel Andrés Messi Cuccittini. Explore dynamic statistics, inspect 3D trophy models, analyze tactical position shifts, take the master trivia challenge, and add your tribute to the global fan wall.
+                </p>
+
+                <!-- Key Hero Quick Metrics -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
+                    <div class="glass-panel p-4 rounded-2xl text-center border-l-4 border-cyan-400 tilt-card">
+                        <div class="text-3xl font-black text-neonBlue font-display">850+</div>
+                        <div class="text-xs uppercase text-slate-400 font-semibold tracking-wider">Career Goals</div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-2xl text-center border-l-4 border-yellow-400 tilt-card">
+                        <div class="text-3xl font-black text-gold font-display">8</div>
+                        <div class="text-xs uppercase text-slate-400 font-semibold tracking-wider">Ballon d'Ors</div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-2xl text-center border-l-4 border-albiceleste tilt-card">
+                        <div class="text-3xl font-black text-albiceleste font-display">46</div>
+                        <div class="text-xs uppercase text-slate-400 font-semibold tracking-wider">World Trophies</div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-2xl text-center border-l-4 border-purple-400 tilt-card">
+                        <div class="text-3xl font-black text-purple-400 font-display">1</div>
+                        <div class="text-xs uppercase text-slate-400 font-semibold tracking-wider">World Cup Champion</div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+                    <a href="#stats" onclick="playSfx('click')" class="px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 font-bold text-darkNavy shadow-lg shadow-cyan-500/30 hover:scale-105 hover:shadow-cyan-500/50 transition-all flex items-center gap-3">
+                        <i class="fa-solid fa-chart-pie text-lg"></i> Explore Goal Data
+                    </a>
+                    <a href="#trophies" onclick="playSfx('click')" class="px-8 py-4 rounded-2xl glass-gold font-bold text-yellow-300 hover:bg-yellow-400/20 transition-all flex items-center gap-3">
+                        <i class="fa-solid fa-cubes text-lg"></i> Launch 3D Trophy Box
+                    </a>
+                </div>
+            </div>
+
+            <!-- Hero Image Banner with Interactive Glow -->
+            <div class="flex-1 relative max-w-md lg:max-w-xl w-full">
+                <div class="absolute -inset-4 bg-gradient-to-r from-cyan-500 via-yellow-400 to-blue-600 rounded-3xl blur-2xl opacity-40 glow-orb"></div>
+                <div class="relative glass-panel rounded-3xl p-4 border border-cyan-500/40 overflow-hidden shadow-2xl">
+                    <img id="heroImage" src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1000&q=80" alt="Soccer Stadium Atmosphere" class="w-full h-[420px] object-cover rounded-2xl filter brightness-95 hover:brightness-110 transition-all duration-500">
+                    <div class="absolute bottom-6 left-6 right-6 p-4 rounded-xl glass-panel bg-darkNavy/80 border border-gold/30">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-gold uppercase tracking-wider font-bold block">Current Club & Country</span>
+                                <span class="text-lg font-bold text-white">Inter Miami CF / Argentina 🇦🇷</span>
+                            </div>
+                            <span class="px-3 py-1 rounded-full bg-yellow-400/20 text-yellow-300 text-xs font-mono font-bold border border-yellow-400/40">Active Legend</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= ICONIC QUOTES CAROUSEL ================= -->
+        <section class="reveal-on-scroll">
+            <div class="glass-panel p-8 rounded-3xl border border-gold/30 text-center space-y-4 relative overflow-hidden">
+                <div class="text-gold text-3xl"><i class="fa-solid fa-quote-left"></i></div>
+                <p id="quoteText" class="text-xl sm:text-2xl font-display font-bold text-white italic max-w-3xl mx-auto min-h-[80px] flex items-center justify-center">
+                    "You have to fight to reach your dream. You have to sacrifice and work hard for it."
+                </p>
+                <div class="text-xs text-yellow-300 font-mono font-semibold uppercase tracking-widest" id="quoteAuthor">
+                    — Lionel Messi
+                </div>
+                <div class="flex justify-center gap-2 pt-2">
+                    <button onclick="prevQuote()" class="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-xs hover:text-gold transition-colors"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button onclick="nextQuote()" class="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-xs hover:text-gold transition-colors"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= STATS & DYNAMIC GOAL CALCULATOR ================= -->
+        <section id="stats" class="space-y-8 reveal-on-scroll">
+            <div class="text-center space-y-3">
+                <h2 class="text-3xl sm:text-5xl font-black font-display text-white">
+                    CAREER <span class="text-neonBlue">ANALYTICS & GOALS</span>
+                </h2>
+                <p class="text-slate-400 max-w-xl mx-auto text-sm sm:text-base">
+                    Filter and analyze Messi's legendary output across clubs, competitions, free-kicks, and key match situations.
+                </p>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="glass-panel p-6 rounded-3xl border border-cyan-500/30 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-2">Filter by Team / Era</label>
+                        <select id="teamFilter" onchange="updateGoalAnalytics()" class="w-full bg-darkNavy border border-cyan-500/40 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-cyan-400">
+                            <option value="all">All Career (Total 850+ Goals)</option>
+                            <option value="barcelona">FC Barcelona (672 Goals)</option>
+                            <option value="argentina">Argentina National Team (106+ Goals)</option>
+                            <option value="psg">Paris Saint-Germain (32 Goals)</option>
+                            <option value="intermiami">Inter Miami CF (25+ Goals)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-2">Filter Goal Type</label>
+                        <select id="typeFilter" onchange="updateGoalAnalytics()" class="w-full bg-darkNavy border border-cyan-500/40 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-cyan-400">
+                            <option value="all">All Goal Types</option>
+                            <option value="leftFoot">Left Foot Shots (670+)</option>
+                            <option value="freekick">Direct Free-Kicks (65+)</option>
+                            <option value="hattrick">Hat-Tricks (57+)</option>
+                            <option value="penalty">Penalties (108+)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-2">Competition Scale</label>
+                        <select id="compFilter" onchange="updateGoalAnalytics()" class="w-full bg-darkNavy border border-cyan-500/40 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-cyan-400">
+                            <option value="all">All Competitions</option>
+                            <option value="league">Domestic Leagues (La Liga / Ligue 1 / MLS)</option>
+                            <option value="ucl">UEFA Champions League (129 Goals)</option>
+                            <option value="worldcup">FIFA World Cup / Copa America (26 Goals)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Live Dynamic Stat Counter Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-slate-800">
+                    <div class="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/20 text-center tilt-card">
+                        <span class="text-xs text-cyan-300 font-bold block mb-1">TOTAL GOALS DISPLAYED</span>
+                        <span id="filteredGoalCount" class="text-4xl font-black font-display text-neonBlue">850</span>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-yellow-950/40 border border-yellow-500/20 text-center tilt-card">
+                        <span class="text-xs text-yellow-300 font-bold block mb-1">CAREER ASSISTS</span>
+                        <span id="filteredAssistCount" class="text-4xl font-black font-display text-gold">378</span>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-blue-950/40 border border-blue-500/20 text-center tilt-card">
+                        <span class="text-xs text-albiceleste font-bold block mb-1">GOAL CONTRIBUTIONS</span>
+                        <span id="filteredTotalContrib" class="text-4xl font-black font-display text-albiceleste">1228</span>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/20 text-center tilt-card">
+                        <span class="text-xs text-emerald-300 font-bold block mb-1">GOALS PER MATCH AVG</span>
+                        <span id="filteredAvgCount" class="text-4xl font-black font-display text-emerald-400">0.79</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualization Bar Chart for Yearly Goals -->
+            <div class="glass-panel p-6 rounded-3xl border border-cyan-500/30">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-column text-cyan-400"></i> Peak Calendar Year Goals (Historic Breakdown)
+                </h3>
+                <div class="space-y-4">
+                    <!-- 2012 Record Year -->
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span class="text-gold">2012 (Guinness World Record)</span>
+                            <span class="text-gold">91 Goals (79 Barca, 12 Arg)</span>
+                        </div>
+                        <div class="w-full h-4 bg-darkNavy rounded-full overflow-hidden border border-yellow-500/40">
+                            <div class="h-full bg-gradient-to-r from-yellow-500 to-amber-300 rounded-full transition-all duration-1000" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <!-- 2011 -->
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span class="text-slate-300">2011 (Sextuple Champion Era)</span>
+                            <span class="text-slate-300">73 Goals</span>
+                        </div>
+                        <div class="w-full h-3 bg-darkNavy rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-1000" style="width: 80%"></div>
+                        </div>
+                    </div>
+                    <!-- 2016 -->
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span class="text-slate-300">2016 (MSN Trio Peak)</span>
+                            <span class="text-slate-300">59 Goals</span>
+                        </div>
+                        <div class="w-full h-3 bg-darkNavy rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-1000" style="width: 65%"></div>
+                        </div>
+                    </div>
+                    <!-- 2022 World Cup Year -->
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span class="text-albiceleste">2022 (World Cup Champion Qatar)</span>
+                            <span class="text-albiceleste">35 Goals + World Cup Trophy</span>
+                        </div>
+                        <div class="w-full h-3 bg-darkNavy rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-sky-400 to-blue-600 rounded-full transition-all duration-1000" style="width: 50%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 3D TROPHY CABINET SECTION ================= -->
+        <section id="trophies" class="space-y-8 reveal-on-scroll">
+            <div class="text-center space-y-3">
+                <h2 class="text-3xl sm:text-5xl font-black font-display text-white">
+                    INTERACTIVE <span class="text-gold">3D TROPHY CABINET</span>
+                </h2>
+                <p class="text-slate-400 max-w-xl mx-auto text-sm sm:text-base">
+                    Click on trophies to load the real-time interactive 3D WebGL model. Drag to rotate and inspect Messi's most iconic silverware.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <!-- 3D Render Canvas Container -->
+                <div class="lg:col-span-7 glass-gold p-4 rounded-3xl relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-3 px-2">
+                        <span class="text-xs font-bold text-yellow-300 uppercase tracking-widest flex items-center gap-2">
+                            <i class="fa-solid fa-cube text-gold"></i> Live WebGL Renderer
+                        </span>
+                        <span class="text-xs text-slate-400 font-mono">Drag mouse to rotate 360°</span>
+                    </div>
+                    <canvas id="trophy3DCanvas"></canvas>
+                    <div id="trophyTitle" class="mt-4 p-3 rounded-xl glass-panel text-center font-bold text-gold text-lg">
+                        🏆 Ballon d'Or (8 Golden Balls Winner)
+                    </div>
+                </div>
+
+                <!-- Interactive Trophy Selection Grid -->
+                <div class="lg:col-span-5 space-y-3">
+                    <button onclick="selectTrophy3D('ballondor')" class="w-full p-4 rounded-2xl glass-panel hover:bg-yellow-500/10 border border-yellow-500/30 text-left transition-all flex items-center justify-between group tilt-card">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center text-gold text-2xl group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-crown"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white group-hover:text-gold transition-colors">Ballon d'Or</h4>
+                                <p class="text-xs text-slate-400">8 Wins (2009, 2010, 2011, 2012, 2015, 2019, 2021, 2023)</p>
+                            </div>
+                        </div>
+                        <span class="font-display font-black text-2xl text-gold">8x</span>
+                    </button>
+
+                    <button onclick="selectTrophy3D('worldcup')" class="w-full p-4 rounded-2xl glass-panel hover:bg-sky-500/10 border border-sky-500/30 text-left transition-all flex items-center justify-between group tilt-card">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl bg-sky-500/20 flex items-center justify-center text-albiceleste text-2xl group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-earth-americas"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white group-hover:text-albiceleste transition-colors">FIFA World Cup</h4>
+                                <p class="text-xs text-slate-400">Qatar 2022 Golden Ball & Champion</p>
+                            </div>
+                        </div>
+                        <span class="font-display font-black text-2xl text-albiceleste">1x</span>
+                    </button>
+
+                    <button onclick="selectTrophy3D('ucl')" class="w-full p-4 rounded-2xl glass-panel hover:bg-cyan-500/10 border border-cyan-500/30 text-left transition-all flex items-center justify-between group tilt-card">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center text-neonBlue text-2xl group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white group-hover:text-neonBlue transition-colors">UEFA Champions League</h4>
+                                <p class="text-xs text-slate-400">2006, 2009, 2011, 2015 Titles</p>
+                            </div>
+                        </div>
+                        <span class="font-display font-black text-2xl text-neonBlue">4x</span>
+                    </button>
+
+                    <button onclick="selectTrophy3D('copa')" class="w-full p-4 rounded-2xl glass-panel hover:bg-emerald-500/10 border border-emerald-500/30 text-left transition-all flex items-center justify-between group tilt-card">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white group-hover:text-emerald-400 transition-colors">Copa América</h4>
+                                <p class="text-xs text-slate-400">2021 & 2024 Back-To-Back Champions</p>
+                            </div>
+                        </div>
+                        <span class="font-display font-black text-2xl text-emerald-400">2x</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TACTICAL HEATMAP & POSITIONAL VISUALIZER ================= -->
+        <section id="tactics" class="space-y-8 reveal-on-scroll">
+            <div class="text-center space-y-3">
+                <h2 class="text-3xl sm:text-5xl font-black font-display text-white">
+                    TACTICAL <span class="text-green-400">HEATMAP & EVOLUTION</span>
+                </h2>
+                <p class="text-slate-400 max-w-xl mx-auto text-sm sm:text-base">
+                    Switch between Messi's career eras to see how his pitch positioning, heat zones, and playmaking duties evolved across two decades.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <!-- Era Switchers -->
+                <div class="lg:col-span-4 space-y-3">
+                    <button onclick="setTacticalEra('rw')" id="btn-era-rw" class="w-full p-4 rounded-2xl glass-panel border border-cyan-500/40 text-left transition-all hover:bg-cyan-500/10 tilt-card">
+                        <span class="text-xs font-bold text-cyan-400 block uppercase">2004 - 2008</span>
+                        <h4 class="text-lg font-bold text-white">Right Wing Slasher</h4>
+                        <p class="text-xs text-slate-400">High speed, direct 1v1 dribbling cutting inside on left foot.</p>
+                    </button>
+
+                    <button onclick="setTacticalEra('false9')" id="btn-era-false9" class="w-full p-4 rounded-2xl glass-panel border border-yellow-500/40 text-left transition-all hover:bg-yellow-500/10 tilt-card">
+                        <span class="text-xs font-bold text-gold block uppercase">2009 - 2014 (Guardiola Era)</span>
+                        <h4 class="text-lg font-bold text-white">The False 9 Maestro</h4>
+                        <p class="text-xs text-slate-400">Dropping deep between lines, creating overloads & record goalscoring.</p>
+                    </button>
+
+                    <button onclick="setTacticalEra('playmaker')" id="btn-era-playmaker" class="w-full p-4 rounded-2xl glass-panel border border-sky-500/40 text-left transition-all hover:bg-sky-500/10 tilt-card">
+                        <span class="text-xs font-bold text-albiceleste block uppercase">2015 - Present</span>
+                        <h4 class="text-lg font-bold text-white">Complete Playmaker & World Champion</h4>
+                        <p class="text-xs text-slate-400">Dictating tempo, key through-balls, assist provider & World Cup hero.</p>
+                    </button>
+                </div>
+
+                <!-- Tactical Pitch Display -->
+                <div class="lg:col-span-8 glass-panel p-6 rounded-3xl border border-green-500/30">
+                    <div id="tacticalPitch" class="tactical-pitch w-full h-[380px] rounded-2xl overflow-hidden relative flex items-center justify-center">
+                        <!-- Pitch Markings -->
+                        <div class="absolute inset-4 border border-white/20 rounded-lg"></div>
+                        <div class="absolute w-full h-[1px] bg-white/20 top-1/2"></div>
+                        <div class="absolute w-32 h-32 border border-white/20 rounded-full"></div>
+                        <div class="absolute top-4 w-48 h-24 border-b border-l border-r border-white/20"></div>
+                        <div class="absolute bottom-4 w-48 h-24 border-t border-l border-r border-white/20"></div>
+
+                        <!-- Dynamic Heatmap Nodes (Rendered via JS) -->
+                        <div id="heatmapContainer"></div>
+                    </div>
+
+                    <div class="mt-4 flex items-center justify-between text-xs text-slate-300">
+                        <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> High Goal Impact Zone</span>
+                        <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-400 inline-block"></span> Key Dribble/Pass Area</span>
+                        <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-400 inline-block"></span> Build-up Zone</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= CAREER TIMELINE / ERAS ================= -->
+        <section id="timeline" class="space-y-8 reveal-on-scroll">
+            <div class="text-center space-y-3">
+                <h2 class="text-3xl sm:text-5xl font-black font-display text-white">
+                    CAREER <span class="text-albiceleste">MILESTONES</span>
+                </h2>
+                <p class="text-slate-400 max-w-xl mx-auto text-sm sm:text-base">
+                    Key defining moments from his debut as a teenager to lifting football's ultimate prize in Qatar.
+                </p>
+            </div>
+
+            <div class="relative border-l-2 border-cyan-500/30 ml-4 md:ml-32 space-y-8 py-4">
+                <!-- Item 1 -->
+                <div class="relative pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-neonBlue shadow-lg shadow-cyan-500/50 group-hover:scale-150 transition-transform"></div>
+                    <div class="glass-panel p-6 rounded-2xl border border-cyan-500/30 max-w-2xl">
+                        <span class="text-xs font-bold text-neonBlue font-mono uppercase">2004 - 2005</span>
+                        <h3 class="text-xl font-bold text-white mt-1">FC Barcelona First Team Debut</h3>
+                        <p class="text-slate-300 text-sm mt-2">Debut at age 17 under Frank Rijkaard, assisted by Ronaldinho for his first official senior goal against Albacete.</p>
+                    </div>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="relative pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-yellow-400 shadow-lg shadow-yellow-400/50 group-hover:scale-150 transition-transform"></div>
+                    <div class="glass-panel p-6 rounded-2xl border border-yellow-500/30 max-w-2xl">
+                        <span class="text-xs font-bold text-gold font-mono uppercase">2009 - 2012</span>
+                        <h3 class="text-xl font-bold text-white mt-1">The 91-Goal World Record & First 4 Ballon d'Ors</h3>
+                        <p class="text-slate-300 text-sm mt-2">Broke Gerd Müller’s 40-year calendar record by scoring 91 goals in 2012. Won four consecutive Ballon d'Or awards.</p>
+                    </div>
+                </div>
+
+                <!-- Item 3 -->
+                <div class="relative pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-blue-500 shadow-lg shadow-blue-500/50 group-hover:scale-150 transition-transform"></div>
+                    <div class="glass-panel p-6 rounded-2xl border border-blue-500/30 max-w-2xl">
+                        <span class="text-xs font-bold text-cyan-300 font-mono uppercase">2015</span>
+                        <h3 class="text-xl font-bold text-white mt-1">The MSN Treble Victory</h3>
+                        <p class="text-slate-300 text-sm mt-2">Formed the deadliest trio in football history alongside Luis Suárez and Neymar Jr, lifting UEFA Champions League & Treble.</p>
+                    </div>
+                </div>
+
+                <!-- Item 4 -->
+                <div class="relative pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-sky-400 shadow-lg shadow-sky-400/50 group-hover:scale-150 transition-transform"></div>
+                    <div class="glass-panel p-6 rounded-2xl border border-sky-400/30 max-w-2xl">
+                        <span class="text-xs font-bold text-albiceleste font-mono uppercase">2021 - 2022</span>
+                        <h3 class="text-xl font-bold text-white mt-1">Copa América & FIFA World Cup Glory</h3>
+                        <p class="text-slate-300 text-sm mt-2">Led Argentina to international triumph at Maracanã in 2021, culminating in winning the 2022 FIFA World Cup in Qatar with 7 goals and the Golden Ball.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MASTER TRIVIA QUIZ ================= -->
+        <section id="quiz" class="space-y-8 reveal-on-scroll">
+            <div class="text-center space-y-3">
+                <h2 class="text-3xl sm:text-5xl font-black font-display text-white">
+                    GOAT <span class="text-purple-400">TRIVIA QUIZ</span>
+                </h2>
+                <p class="text-slate-400 max-w-xl mx-auto text-sm sm:text-base">
+                    Test your knowledge of Lionel Messi's career. Earn points and unlock custom fan rank badges.
+                </p>
+            </div>
+
+            <div class="glass-panel p-8 rounded-3xl border border-purple-500/30 max-w-2xl mx-auto relative overflow-hidden">
+                <div id="quizBox">
+                    <div class="flex justify-between items-center mb-6">
+                        <span id="quizProgress" class="text-xs font-bold text-purple-300 uppercase tracking-widest">Question 1 of 5</span>
+                        <span id="quizScore" class="text-xs font-mono bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-500/40">Score: 0</span>
+                    </div>
+
+                    <h3 id="quizQuestion" class="text-xl font-bold text-white mb-6">Loading Question...</h3>
+
+                    <div id="quizOptions" class="space-y-3 mb-6">
+                        <!-- Options injected dynamically -->
+                    </div>
+
+                    <button id="nextQuizBtn" onclick="nextQuestion()" class="w-full py-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 font-bold text-white transition-all hidden">
+                        Next Question <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+
+                <!-- Quiz Completion Screen -->
+                <div id="quizResult" class="hidden text-center space-y-6 py-6">
+                    <div class="w-20 h-20 rounded-full bg-yellow-500/20 border-2 border-gold text-gold text-4xl flex items-center justify-center mx-auto animate-bounce">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <h3 class="text-3xl font-black text-white">Quiz Completed!</h3>
+                    <p id="finalScoreText" class="text-slate-300 text-lg">You scored 5 out of 5!</p>
+                    <div id="badgeContainer" class="p-4 rounded-2xl glass-gold max-w-md mx-auto">
+                        <span class="text-xs text-yellow-300 font-bold block uppercase mb-1">UNLOCKED BADGE</span>
+                        <span id="badgeTitle" class="text-2xl font-black text-gold font-display">👑 GOAT Football Scholar</span>
+                    </div>
+                    <button onclick="resetQuiz()" class="px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-bold text-darkNavy shadow-lg">
+                        Play Again
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= FAN TRIBUTE WALL ================= -->
+        <section id="tributes" class="space-y-8 pb-16 reveal-on-scroll">
+            <div class="text-center space-y-3">
+                <h2 class="text-3xl sm:text-5xl font-black font-display text-white">
+                    GLOBAL <span class="text-pink-400">FAN TRIBUTE WALL</span>
+                </h2>
+                <p class="text-slate-400 max-w-xl mx-auto text-sm sm:text-base">
+                    Leave your personal message for Lionel Messi. React to tributes from fans around the globe.
+                </p>
+            </div>
+
+            <!-- Form to Post -->
+            <div class="glass-panel p-6 rounded-3xl border border-pink-500/30 max-w-xl mx-auto space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input type="text" id="fanName" placeholder="Your Name or Handle" class="bg-darkNavy border border-pink-500/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pink-400">
+                    <input type="text" id="fanLocation" placeholder="City / Country 🇦🇷" class="bg-darkNavy border border-pink-500/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pink-400">
+                </div>
+                <textarea id="fanMessage" rows="3" placeholder="Write your tribute message to LM10..." class="w-full bg-darkNavy border border-pink-500/30 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-pink-400"></textarea>
+                <button onclick="postTribute()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 font-bold text-white hover:opacity-90 transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> Submit Fan Tribute
+                </button>
+            </div>
+
+            <!-- Tributes Grid -->
+            <div id="tributesGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Tributes Injected via Javascript -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-cyan-500/20 py-8 bg-darkNavy/90 backdrop-blur-xl text-center text-xs text-slate-400 space-y-2">
+        <p>Created with passion for Lionel Andrés Messi — The Undisputed GOAT ⚽ LM10</p>
+        <p class="text-slate-500">Interactive Web Presentation & Analytics Framework</p>
+    </footer>
+
+    <!-- JS CODEBASE -->
+    <script>
+        /* ================= 1. AUDIO SYNTHESIZER (WEB AUDIO API) ================= */
+        let audioEnabled = true;
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioCtx;
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const btnText = document.getElementById('soundText');
+            const btnIcon = document.getElementById('soundIcon');
+            if (audioEnabled) {
+                btnText.innerText = "SFX ON";
+                btnIcon.className = "fa-solid fa-volume-high";
+            } else {
+                btnText.innerText = "SFX OFF";
+                btnIcon.className = "fa-solid fa-volume-xmark";
+            }
+        }
+
+        function playSfx(type) {
+            if (!audioEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                const now = ctx.currentTime;
+                if (type === 'click') {
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'correct') {
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.08);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'wrong') {
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.setValueAtTime(164.81, now + 0.1);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                }
+            } catch (e) {
+                console.log("Audio play error", e);
+            }
+        }
+
+        /* ================= 2. INTERACTIVE PARTICLE CANVAS ================= */
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null, radius: 120 };
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            const count = Math.floor((canvas.width * canvas.height) / 18000);
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.6,
+                    vy: (Math.random() - 0.5) * 0.6,
+                    size: Math.random() * 2 + 1,
+                    color: Math.random() > 0.4 ? 'rgba(0, 240, 255, ' : 'rgba(255, 215, 0, '
+                });
+            }
+        }
+
+        window.addEventListener('resize', initCanvas);
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                if (mouse.x && mouse.y) {
+                    let dx = mouse.x - p.x;
+                    let dy = mouse.y - p.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < mouse.radius) {
+                        p.x -= (dx / dist) * 2;
+                        p.y -= (dy / dist) * 2;
+                    }
+                }
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = p.color + '0.4)';
+                ctx.fill();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        initCanvas();
+        animateParticles();
+
+        /* ================= 3. QUOTES CAROUSEL ================= */
+        const quotes = [
+            { text: '"You have to fight to reach your dream. You have to sacrifice and work hard for it."', author: '— Lionel Messi' },
+            { text: '"Messi is the only player that runs faster with the ball than he does without it."', author: '— Pep Guardiola' },
+            { text: '"For me, to watch Messi play is a pleasure – it’s like having an orgasm – it’s an incredible pleasure."', author: '— Luís Figo' },
+            { text: '"Don\'t write about him, don\'t try to describe him. Just watch him."', author: '— Pep Guardiola' }
+        ];
+        let currentQuoteIdx = 0;
+
+        function updateQuote() {
+            const q = quotes[currentQuoteIdx];
+            document.getElementById('quoteText').innerText = q.text;
+            document.getElementById('quoteAuthor').innerText = q.author;
+        }
+
+        function nextQuote() {
+            playSfx('click');
+            currentQuoteIdx = (currentQuoteIdx + 1) % quotes.length;
+            updateQuote();
+        }
+
+        function prevQuote() {
+            playSfx('click');
+            currentQuoteIdx = (currentQuoteIdx - 1 + quotes.length) % quotes.length;
+            updateQuote();
+        }
+
+        /* ================= 4. STATS CALCULATOR & FILTER ================= */
+        const statsDb = {
+            all: { goals: 850, assists: 378, total: 1228, avg: 0.79 },
+            barcelona: { goals: 672, assists: 303, total: 975, avg: 0.86 },
+            argentina: { goals: 106, assists: 56, total: 162, avg: 0.59 },
+            psg: { goals: 32, assists: 35, total: 67, avg: 0.43 },
+            intermiami: { goals: 25, assists: 16, total: 41, avg: 0.83 }
+        };
+
+        function updateGoalAnalytics() {
+            playSfx('click');
+            const team = document.getElementById('teamFilter').value;
+            const data = statsDb[team] || statsDb.all;
+
+            document.getElementById('filteredGoalCount').innerText = data.goals;
+            document.getElementById('filteredAssistCount').innerText = data.assists;
+            document.getElementById('filteredTotalContrib').innerText = data.total;
+            document.getElementById('filteredAvgCount').innerText = data.avg;
+        }
+
+        /* ================= 5. THREE.JS 3D TROPHY RENDERER ================= */
+        let scene, camera, renderer, trophyMesh;
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+
+        function init3DTrophy() {
+            const container = document.getElementById('trophy3DCanvas');
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.z = 6;
+
+            renderer = new THREE.WebGLRenderer({ canvas: container, alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffd700, 1.2);
+            dirLight.position.set(5, 5, 5);
+            scene.add(dirLight);
+
+            const pointLight = new THREE.PointLight(0x00f0ff, 1);
+            pointLight.position.set(-5, -5, -5);
+            scene.add(pointLight);
+
+            createTrophyGeometry('ballondor');
+
+            container.addEventListener('mousedown', e => { isDragging = true; });
+            container.addEventListener('mousemove', e => {
+                if (isDragging && trophyMesh) {
+                    let deltaMove = { x: e.offsetX - previousMousePosition.x, y: e.offsetY - previousMousePosition.y };
+                    trophyMesh.rotation.y += deltaMove.x * 0.01;
+                    trophyMesh.rotation.x += deltaMove.y * 0.01;
+                }
+                previousMousePosition = { x: e.offsetX, y: e.offsetY };
+            });
+            window.addEventListener('mouseup', e => { isDragging = false; });
+
+            animate3D();
+        }
+
+        function createTrophyGeometry(type) {
+            if (trophyMesh) scene.remove(trophyMesh);
+
+            let group = new THREE.Group();
+
+            if (type === 'ballondor') {
+                // 1. Perfectly Smooth Round Golden Sphere
+                const ballRadius = 1.35;
+                const ballGeom = new THREE.SphereGeometry(ballRadius, 64, 64);
+                
+                // High-shine mirror gold material
+                const goldMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xffd700,
+                    metalness: 0.98,
+                    roughness: 0.08,
+                    envMapIntensity: 3.0
+                });
+
+                const ball = new THREE.Mesh(ballGeom, goldMaterial);
+                ball.position.y = 0.55;
+                group.add(ball);
+
+                // 2. Realistic Curved Rectangular / Hexagonal Panel Seam Grooves
+                const seamGroup = new THREE.Group();
+                const seamMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x997300,
+                    metalness: 0.9,
+                    roughness: 0.35
+                });
+
+                // Generate rectangular panel seams wrapped around the latitude and longitude of the sphere
+                const ringsCount = 6;
+                const segmentsPerRing = 10;
+
+                for (let r = 1; r < ringsCount; r++) {
+                    const phi = (Math.PI / ringsCount) * r;
+                    const ringRadius = ballRadius * Math.sin(phi);
+                    const ringY = ballRadius * Math.cos(phi) + 0.55;
+
+                    // Latitude seam ring
+                    const latRing = new THREE.Mesh(
+                        new THREE.TorusGeometry(ringRadius * 1.002, 0.016, 8, 48),
+                        seamMaterial
+                    );
+                    latRing.rotation.x = Math.PI / 2;
+                    latRing.position.y = ringY;
+                    seamGroup.add(latRing);
+
+                    // Longitudinal rectangular panel dividers
+                    for (let s = 0; s < segmentsPerRing; s++) {
+                        const theta = ((2 * Math.PI) / segmentsPerRing) * s + (r % 2 ? 0.2 : 0);
+                        const seamSegment = new THREE.Mesh(
+                            new THREE.CylinderGeometry(0.015, 0.015, (Math.PI * ballRadius) / ringsCount, 8),
+                            seamMaterial
+                        );
+                        seamSegment.position.set(
+                            ballRadius * Math.sin(phi) * Math.cos(theta),
+                            ringY,
+                            ballRadius * Math.sin(phi) * Math.sin(theta)
+                        );
+                        seamSegment.rotation.z = Math.PI / 2 - phi;
+                        seamSegment.rotation.y = -theta;
+                        seamGroup.add(seamSegment);
+                    }
+                }
+                group.add(seamGroup);
+
+                // Engraved Golden Center Band
+                const bandGeom = new THREE.CylinderGeometry(ballRadius * 1.003, ballRadius * 1.003, 0.1, 64);
+                const bandMat = new THREE.MeshStandardMaterial({
+                    color: 0xd4af37,
+                    metalness: 0.95,
+                    roughness: 0.15
+                });
+                const band = new THREE.Mesh(bandGeom, bandMat);
+                band.position.y = 0.55;
+                group.add(band);
+
+                // 3. Realistic Pyrite Crystalline Rock Base
+                const baseGroup = new THREE.Group();
+                const rockGeom = new THREE.DodecahedronGeometry(1.15, 2);
+                
+                const pos = rockGeom.attributes.position;
+                for (let i = 0; i < pos.count; i++) {
+                    let vx = pos.getX(i);
+                    let vy = pos.getY(i);
+                    let vz = pos.getZ(i);
+                    const noise = (Math.sin(vx * 6) + Math.cos(vy * 6) + Math.sin(vz * 6)) * 0.14;
+                    pos.setXYZ(i, vx + noise, vy * 0.72 + noise, vz + noise);
+                }
+                rockGeom.computeVertexNormals();
+
+                const rockMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xd4af37,
+                    metalness: 0.92,
+                    roughness: 0.25,
+                    flatShading: true
+                });
+
+                const rockBase = new THREE.Mesh(rockGeom, rockMaterial);
+                rockBase.position.y = -1.15;
+                rockBase.scale.set(1.25, 0.9, 1.25);
+                baseGroup.add(rockBase);
+
+                // 4. Metallic Gold Plaque on Front
+                const plaqueGeom = new THREE.BoxGeometry(0.95, 0.42, 0.05);
+                const plaqueMat = new THREE.MeshStandardMaterial({
+                    color: 0xffec8b,
+                    metalness: 0.98,
+                    roughness: 0.05
+                });
+                const plaque = new THREE.Mesh(plaqueGeom, plaqueMat);
+                plaque.position.set(0, -1.15, 1.18);
+                baseGroup.add(plaque);
+
+                group.add(baseGroup);
+            } else if (type === 'worldcup') {
+                const geom = new THREE.CylinderGeometry(0.6, 0.9, 2.8, 32);
+                const mat = new THREE.MeshStandardMaterial({ color: 0xe6b800, roughness: 0.3, metalness: 0.8 });
+                const cup = new THREE.Mesh(geom, mat);
+                group.add(cup);
+
+                const globe = new THREE.Mesh(new THREE.SphereGeometry(0.8, 16, 16), mat);
+                globe.position.y = 1.4;
+                group.add(globe);
+            } else {
+                const geom = new THREE.TorusGeometry(1.2, 0.4, 16, 100);
+                const mat = new THREE.MeshStandardMaterial({ color: 0x00f0ff, roughness: 0.1, metalness: 0.8 });
+                const ring = new THREE.Mesh(geom, mat);
+                group.add(ring);
+            }
+
+            trophyMesh = group;
+            scene.add(trophyMesh);
+        }
+
+        function selectTrophy3D(type) {
+            playSfx('click');
+            createTrophyGeometry(type);
+            const titleEl = document.getElementById('trophyTitle');
+            if (type === 'ballondor') titleEl.innerText = "🏆 Ballon d'Or (8 Golden Balls Winner)";
+            else if (type === 'worldcup') titleEl.innerText = "⚽ FIFA World Cup Trophy (Qatar 2022)";
+            else if (type === 'ucl') titleEl.innerText = "⭐ UEFA Champions League Trophy (4 Titles)";
+            else titleEl.innerText = "🛡️ Copa América Champion Trophy (2 Wins)";
+        }
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            if (trophyMesh && !isDragging) {
+                trophyMesh.rotation.y += 0.008;
+            }
+            renderer.render(scene, camera);
+        }
+
+        window.onload = () => { init3DTrophy(); };
+
+        /* ================= 6. TACTICAL HEATMAP SWITCHER ================= */
+        const heatmapEras = {
+            rw: [
+                { top: '30%', left: '75%', color: 'bg-red-500', size: 'w-24 h-24' },
+                { top: '40%', left: '80%', color: 'bg-yellow-400', size: 'w-32 h-32' }
+            ],
+            false9: [
+                { top: '50%', left: '60%', color: 'bg-red-500', size: 'w-36 h-36' },
+                { top: '35%', left: '65%', color: 'bg-yellow-400', size: 'w-28 h-28' },
+                { top: '60%', left: '70%', color: 'bg-green-400', size: 'w-32 h-32' }
+            ],
+            playmaker: [
+                { top: '60%', left: '45%', color: 'bg-yellow-400', size: 'w-40 h-40' },
+                { top: '45%', left: '55%', color: 'bg-red-500', size: 'w-32 h-32' },
+                { top: '70%', left: '50%', color: 'bg-green-400', size: 'w-36 h-36' }
+            ]
+        };
+
+        function setTacticalEra(era) {
+            playSfx('click');
+            const container = document.getElementById('heatmapContainer');
+            container.innerHTML = '';
+
+            const nodes = heatmapEras[era] || heatmapEras.false9;
+            nodes.forEach(n => {
+                const div = document.createElement('div');
+                div.className = `heatmap-node ${n.color} ${n.size}`;
+                div.style.top = n.top;
+                div.style.left = n.left;
+                container.appendChild(div);
+            });
+        }
+        setTacticalEra('false9');
+
+        /* ================= 7. MASTER TRIVIA QUIZ LOGIC ================= */
+        const quizData = [
+            {
+                q: "How many Ballon d'Or awards has Lionel Messi won in total?",
+                options: ["6 Wins", "7 Wins", "8 Wins", "9 Wins"],
+                correct: 2
+            },
+            {
+                q: "In 2012, how many total calendar goals did Messi score to set the Guinness World Record?",
+                options: ["85 Goals", "91 Goals", "96 Goals", "88 Goals"],
+                correct: 1
+            },
+            {
+                q: "Which team did Messi score his iconic solo dribble goal against in 2007 (similar to Maradona)?",
+                options: ["Real Madrid", "Getafe", "Athletic Bilbao", "Sevilla"],
+                correct: 1
+            },
+            {
+                q: "Messi won his first official major senior trophy with Argentina in 2021. What was it?",
+                options: ["FIFA World Cup", "Copa América", "Finalissima", "Olympic Gold"],
+                correct: 1
+            },
+            {
+                q: "Which shirt number did Messi wear during his first senior debut seasons at FC Barcelona?",
+                options: ["10", "19", "30", "18"],
+                correct: 2
+            }
+        ];
+
+        let currentQ = 0;
+        let score = 0;
+
+        function loadQuestion() {
+            const data = quizData[currentQ];
+            document.getElementById('quizProgress').innerText = `Question ${currentQ + 1} of ${quizData.length}`;
+            document.getElementById('quizQuestion').innerText = data.q;
+
+            const opts = document.getElementById('quizOptions');
+            opts.innerHTML = '';
+
+            data.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-4 rounded-xl glass-panel text-left font-semibold text-slate-200 hover:border-purple-400 hover:bg-purple-500/10 transition-all flex items-center justify-between";
+                btn.innerHTML = `<span>${opt}</span><i class="fa-regular fa-circle text-purple-400"></i>`;
+                btn.onclick = () => selectQuizAnswer(idx, btn);
+                opts.appendChild(btn);
+            });
+
+            document.getElementById('nextQuizBtn').classList.add('hidden');
+        }
+
+        function selectQuizAnswer(selectedIdx, btnEl) {
+            const data = quizData[currentQ];
+            const allBtns = document.getElementById('quizOptions').children;
+            for (let b of allBtns) { b.disabled = true; }
+
+            if (selectedIdx === data.correct) {
+                playSfx('correct');
+                btnEl.className = "w-full p-4 rounded-xl bg-emerald-500/20 border-2 border-emerald-400 text-left font-bold text-emerald-300 flex items-center justify-between";
+                btnEl.querySelector('i').className = "fa-solid fa-circle-check text-emerald-400";
+                score++;
+            } else {
+                playSfx('wrong');
+                btnEl.className = "w-full p-4 rounded-xl bg-red-500/20 border-2 border-red-400 text-left font-bold text-red-300 flex items-center justify-between";
+                btnEl.querySelector('i').className = "fa-solid fa-circle-xmark text-red-400";
+
+                allBtns[data.correct].className = "w-full p-4 rounded-xl bg-emerald-500/20 border-2 border-emerald-400 text-left font-bold text-emerald-300 flex items-center justify-between";
+            }
+
+            document.getElementById('quizScore').innerText = `Score: ${score}`;
+            document.getElementById('nextQuizBtn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            playSfx('click');
+            currentQ++;
+            if (currentQ < quizData.length) {
+                loadQuestion();
+            } else {
+                showQuizResult();
+            }
+        }
+
+        function showQuizResult() {
+            document.getElementById('quizBox').classList.add('hidden');
+            document.getElementById('quizResult').classList.remove('hidden');
+            document.getElementById('finalScoreText').innerText = `You scored ${score} out of ${quizData.length}!`;
+
+            const badge = document.getElementById('badgeTitle');
+            if (score === 5) badge.innerText = "👑 GOAT Football Scholar";
+            else if (score >= 3) badge.innerText = "⭐ Elite LM10 Admirer";
+            else badge.innerText = "⚽ Rising Fan";
+        }
+
+        function resetQuiz() {
+            playSfx('click');
+            currentQ = 0;
+            score = 0;
+            document.getElementById('quizScore').innerText = "Score: 0";
+            document.getElementById('quizBox').classList.remove('hidden');
+            document.getElementById('quizResult').classList.add('hidden');
+            loadQuestion();
+        }
+
+        loadQuestion();
+
+        /* ================= 8. GLOBAL FAN TRIBUTE WALL ================= */
+        let tributes = [
+            { name: "Mateo S.", loc: "Rosario, Argentina 🇦🇷", msg: "Gracias por la Copa del Mundo Leo! Siempre serás el más grande de la historia.", likes: 142 },
+            { name: "Julian K.", loc: "Barcelona, Spain 🇪🇸", msg: "Watching you at Camp Nou was the single greatest privilege of my life.", likes: 98 },
+            { name: "David M.", loc: "Miami, USA 🇺🇸", msg: "Bringing magic to MLS every single match. Truly the GOAT!", likes: 54 }
+        ];
+
+        function renderTributes() {
+            const grid = document.getElementById('tributesGrid');
+            grid.innerHTML = '';
+            tributes.forEach((t, i) => {
+                const card = document.createElement('div');
+                card.className = "glass-panel p-6 rounded-2xl border border-pink-500/20 space-y-3 flex flex-col justify-between tilt-card";
+                card.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-pink-500/20 border border-pink-500/40 text-pink-300 font-bold flex items-center justify-center">
+                                ${t.name.charAt(0)}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">${t.name}</h4>
+                                <span class="text-xs text-slate-400">${t.loc}</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed font-light">"${t.msg}"</p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-800 flex justify-between items-center text-xs">
+                        <button onclick="likeTribute(${i})" class="text-pink-400 font-semibold hover:text-pink-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-heart"></i> <span>${t.likes}</span>
+                        </button>
+                        <span class="text-slate-500">Verified Fan</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            initTiltPhysics();
+        }
+
+        function likeTribute(idx) {
+            playSfx('click');
+            tributes[idx].likes++;
+            renderTributes();
+        }
+
+        function postTribute() {
+            playSfx('click');
+            const name = document.getElementById('fanName').value.trim();
+            const loc = document.getElementById('fanLocation').value.trim();
+            const msg = document.getElementById('fanMessage').value.trim();
+
+            if (!name || !msg) {
+                alert("Please fill in your name and tribute message.");
+                return;
+            }
+
+            tributes.unshift({ name: name, loc: loc || 'Global Fan ⚽', msg: msg, likes: 1 });
+            renderTributes();
+
+            document.getElementById('fanName').value = '';
+            document.getElementById('fanLocation').value = '';
+            document.getElementById('fanMessage').value = '';
+        }
+
+        renderTributes();
+
+        /* 3D Tilt Effect on Hover */
+        function initTiltPhysics() {
+            const tiltCards = document.querySelectorAll('.tilt-card');
+            tiltCards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -8;
+                    const rotateY = ((x - centerX) / centerX) * 8;
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+                });
+            });
+        }
+        initTiltPhysics();
+
+        /* Scroll Reveal Animation Trigger */
+        const revealElements = document.querySelectorAll('.reveal-on-scroll');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        revealElements.forEach(el => revealObserver.observe(el));
+
+        /* Mobile Drawer Toggle */
+        function toggleMobileMenu() {
+            playSfx('click');
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('opacity-0');
+            menu.classList.toggle('pointer-events-none');
+        }
+    </script>
+</body>
+</html>
